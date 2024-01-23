@@ -154,6 +154,10 @@ There are two different values that deliver with the `status` field:
 * `PROCESSING` - Continue to poll for the results using the [GET scores](#get-score-of-a-single-address) endpoint until the `DONE` status is returned. `score` field will return as `null`.
 * `DONE` - The Scorer has completed scoring the specified Passport. `score` field will return with Passport score.
 
+#### Refreshing scores
+
+The score displayed in the Passport app is refreshed automatically, whenever the user makes any change to their Passport. However, API users may find the scores returned by the API sometimes differs from the score displayed in the app. If this happens, refresh the Passport score by making a POST request to `submit-passport`.
+
 > POST /registry/submit-passport
 
 #### JSON body parameters
@@ -189,7 +193,13 @@ The name in the parenthesis represents what [type of Scorer](/building-with-pass
     "status": "PROCESSING",
     "last_score_timestamp": "2023-02-03T12:08:21.735838+00:00",
     "evidence": null,
-    "error": null
+    "error": null,
+    "stamp_scores": {
+      "Ens": "2.2",
+      "NFT": "0.69",
+      "Google": "2.25"
+      ...
+    }
 }
 ```
 
@@ -200,7 +210,13 @@ The name in the parenthesis represents what [type of Scorer](/building-with-pass
     "status": "DONE",
     "last_score_timestamp": "{timestamp}",
     "evidence": null,
-    "error": null
+    "error": null,
+    "stamp_scores": {
+      "Ens": "2.2",
+      "NFT": "0.69",
+      "Google": "2.25"
+      ...
+    }
 }
 ```
 
@@ -216,7 +232,13 @@ The name in the parenthesis represents what [type of Scorer](/building-with-pass
         "rawScore": "{score}",
         "threshold": "15.00000"
     },
-    "error": null
+    "error": null,
+    "stamp_scores": {
+      "Ens": "2.2",
+      "NFT": "0.69",
+      "Google": "2.25"
+      ...
+    }
 }
 ```
 
@@ -243,11 +265,20 @@ curl --request GET \
           "status": "DONE",
           "last_score_timestamp": "{timestamp}",
           "evidence": null,
-          "error": null
+          "error": null,
+          "stamp_scores": {
+            "Ens": "2.2",
+            "NFT": "0.69",
+            "Google": "2.25"
+            ...
+          }
       }
   ]
 }        
 ```
+
+> API users may find the scores returned by `registry/score` sometimes differs from the score displayed in the app. If this happens, simply refresh the Passport score by making a POST request to `submit-passport`.
+
 
 ### Get scores of all submitted addresses
 
@@ -259,12 +290,12 @@ Use this endpoint to retrieve the score for one Ethereum address. You can use th
 
 #### Query parameters
 
-| Name                       | Required | Text                                                                                                                                                                                                 |
-| -------------------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `last_score_timestamp_gt`  | No       | Filters response to only those scores submitted to the given Scorer instance \*after\* the given timestamp. Format: [ISO 8601](https://www.iso.org/iso-8601-date-and-time-format.html)               |
-| `last_score_timestamp_gte` | No       | Filters response to only those scores submitted to the given Scorer instance \*after or at\* the given timestamp. Format: [ISO 8601](https://www.iso.org/iso-8601-date-and-time-format.html)         |
-| `limit`                    | No       | Paginates response, providing the given number of response elements per page. Learn more about [pagination](#pagination).                                                                            |
-| `offset`                   | No       | For a paginated response, `offset` determines the Stamp object at which the response should start. Learn more about [pagination](#pagination).                                                       |
+| Name                       | Required | Text                                                                                                                                                                                         |
+| -------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `last_score_timestamp_gt`  | No       | Filters response to only those scores submitted to the given Scorer instance \*after\* the given timestamp. Format: [ISO 8601](https://www.iso.org/iso-8601-date-and-time-format.html)       |
+| `last_score_timestamp_gte` | No       | Filters response to only those scores submitted to the given Scorer instance \*after or at\* the given timestamp. Format: [ISO 8601](https://www.iso.org/iso-8601-date-and-time-format.html) |
+| `limit`                    | No       | Paginates response, providing the given number of response elements per page. Learn more about [pagination](#pagination).                                                                    |
+| `offset`                   | No       | For a paginated response, `offset` determines the Stamp object at which the response should start. Learn more about [pagination](#pagination).                                               |
 
 
 ```bash filename="Sample request" copy
@@ -282,7 +313,13 @@ curl --request GET \
             "status": "DONE",
             "last_score_timestamp": "{timestamp}",
             "evidence": null,
-            "error": null
+            "error": null,
+            "stamp_scores": {
+              "Ens": "2.2",
+              "NFT": "0.69",
+              "Google": "2.25"
+              ...
+            }
         },
         {
             "address": "{wallet}",
@@ -290,7 +327,13 @@ curl --request GET \
             "status": "DONE",
             "last_score_timestamp": "{timestamp}",
             "evidence": null,
-            "error": null
+            "error": null,
+            "stamp_scores": {
+              "Ens": "2.2",
+              "NFT": "0.69",
+              "Google": "2.25"
+              ...
+            }
         }
     ],
     "count": 2
@@ -310,6 +353,9 @@ curl --request GET \
     --url https://api.scorer.gitcoin.co/registry/score/{scorer_id}?address={address}?last_score_timestamp_get=2023-07-20T19%3A54%3A44.463335%2B00%3A00 \
     --header 'X-API-KEY: {API KEY}'
 ```
+
+
+Also note that because Stamp deduplication is achieved using a 'last in, first out' model, it is possible for Passports with identical Stamps to return different scores from different Scorers. The reason is that if the identical passports A and B are submitted to Scorer 1 in the order `A,B`, the returned score could be different to the same Passports submitted to Scorer 2 in the order `B,A`, because different instances of duplicate Stamps would be removed.
 
 
 ### Get Stamps

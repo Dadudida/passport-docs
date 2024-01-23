@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "postbuild": "next-sitemap",
     "start": "next start"
   },
   "repository": {
@@ -19,10 +20,12 @@
   "homepage": "https://github.com/",
   "dependencies": {
     "next": "^13.0.6",
-    "nextra": "^2.11.0",
+    "next-sitemap": "^4.2.3",
+    "nextra": "2.13.2",
     "nextra-theme-docs": "latest",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "react-gtm-module": "^2.0.11"
   },
   "devDependencies": {
     "@types/node": "18.11.10",
